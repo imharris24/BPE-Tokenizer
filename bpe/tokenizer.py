@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+import json
 import time
 from pathlib import Path
 
 from bpe.trainer import merge_pair, train_bpe
-from bpe.utils import load_tokenizer, save_tokenizer
 
 
 class BPETokenizer:
@@ -73,10 +73,35 @@ class BPETokenizer:
         return len(text.encode("utf-8")) / len(ids)
 
     def save(self, path: str | Path) -> None:
-        """Save tokenizer to a JSON file."""
-        save_tokenizer(self, path)
+        """Save tokenizer vocab and merges to a JSON file."""
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        data = {
+            "vocab_size": len(self.vocab),
+            "merges": {f"{a},{b}": idx for (a, b), idx in self.merges.items()},
+        }
+        path.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
     @staticmethod
     def load(path: str | Path) -> "BPETokenizer":
         """Load a tokenizer from a JSON file."""
-        return load_tokenizer(path)
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+
+        tokenizer = BPETokenizer()
+        # Base vocab: bytes 0-255
+        for i in range(256):
+            tokenizer.vocab[i] = bytes([i])
+
+        # Rebuild merges in order of their assigned IDs
+        merges_raw = []
+        for key, new_id in data["merges"].items():
+            a, b = key.split(",")
+            merges_raw.append((int(a), int(b), new_id))
+        merges_raw.sort(key=lambda x: x[2])
+
+        for a, b, new_id in merges_raw:
+            tokenizer.merges[(a, b)] = new_id
+            tokenizer.vocab[new_id] = tokenizer.vocab[a] + tokenizer.vocab[b]
+
+        return tokenizer
