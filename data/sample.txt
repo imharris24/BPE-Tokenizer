@@ -1,0 +1,39 @@
+The quick brown fox jumps over the lazy dog.
+The quick brown fox jumps over the lazy dog.
+The quick brown fox jumps over the lazy dog.
+
+In the beginning, there was nothing but bytes. Then someone had the idea to group them together, and language was born. The tokenizer is the bridge between raw text and the integer sequences that models understand.
+
+Tokenization is the process of converting a sequence of characters into a sequence of tokens. In the context of large language models, tokens are the basic units of text that the model processes. The way text is tokenized has a profound impact on model behavior, performance, and even the kinds of errors models make.
+
+Byte-level BPE is a subword tokenization algorithm that operates on raw bytes rather than characters. This means it can handle any Unicode text without needing an unknown token. The algorithm starts with a base vocabulary of all 256 single bytes and iteratively merges the most frequent adjacent pairs of tokens until the target vocabulary size is reached.
+
+The most common words in a language tend to become single tokens after training. For example, "the" might be a single token, as might "and" or "ing". Rare words get split into subwords — "tokenization" might become "token" + "ization". Completely novel words can still be represented because the base vocabulary covers every possible byte.
+
+This is why modern language models can handle text in any language, any emoji, any weird Unicode character — they never need an unknown token. The byte-level representation guarantees that every possible input string maps to some sequence of token IDs.
+
+The compression ratio of a tokenizer measures how many bytes of raw text, on average, are represented by each token. A higher compression ratio means the model sees fewer tokens for the same text, which means it can process longer contexts within its fixed context window. This is one reason why tokenization choices matter so much for model performance.
+
+Training a tokenizer is fast — much faster than training the language model itself. But the choices made during tokenizer training ripple through the entire model. A tokenizer that splits words into too many pieces makes the model work harder to understand each word. A tokenizer that is too aggressive in merging might create tokens that are hard for the model to use compositionally.
+
+The best tokenizers strike a balance: common patterns become single tokens, but the vocabulary remains small enough that the model's embedding table and output head stay manageable. GPT-2 used a vocabulary of 50,257 tokens. Modern models use larger vocabularies, sometimes 100,000 or more.
+
+Understanding tokenization helps explain many quirks of language model behavior. Why do models struggle with counting letters? Because common words are single tokens — the model never sees the individual letters. Why do models sometimes repeat themselves? Because certain token sequences are highly probable given the training data. Why do models handle code differently than prose? Because code has different statistical patterns that the tokenizer learned to handle.
+
+The study of tokenization is the study of how we represent language for machines. It sits at the intersection of information theory, linguistics, and machine learning. And it all starts with a simple idea: merge the most frequent pairs, repeat, and see what you get.
+
+Hello, world! This is a test of the BPE tokenizer.
+Hello, world! This is a test of the BPE tokenizer.
+Hello, world! This is a test of the BPE tokenizer.
+
+The art of tokenization is the art of compression. The art of compression is the art of finding patterns. The art of finding patterns is the art of intelligence.
+
+a a a a a a a a a a a a a a a a a a a a
+b b b b b b b b b b b b b b b b b b b b
+c c c c c c c c c c c c c c c c c c c c
+the the the the the the the the the the
+and and and and and and and and and and
+ing ing ing ing ing ing ing ing ing ing
+tion tion tion tion tion tion tion tion
+er er er er er er er er er er er er er
+th th th th th th th th th th th th th
